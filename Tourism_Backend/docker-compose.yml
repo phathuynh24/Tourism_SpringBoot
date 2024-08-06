@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  tourism_postgres:
+    image: postgres:16.3
+    container_name: tourism_postgres
+    environment:
+      POSTGRES_DB: tourism_db
+      POSTGRES_USER: tourism_backend
+      POSTGRES_PASSWORD: phat123456
+    ports:
+      - "5433:5432"  # Change the external port to 5433 to avoid conflict
+    volumes:
+      - tourism_postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot_app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://tourism_postgres:5432/tourism_db
+      SPRING_DATASOURCE_USERNAME: tourism_backend
+      SPRING_DATASOURCE_PASSWORD: phat123456
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tourism_postgres
+
+volumes:
+  tourism_postgres_data:
