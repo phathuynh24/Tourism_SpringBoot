@@ -18,20 +18,20 @@ public class DestinationService {
         return destinationRepository.save(destination);
     }
 
-    public Destination updateDestination(Long id, Destination updatedDestination) {
-        Optional<Destination> existingDestinationOpt = destinationRepository.findById(id);
-        if (existingDestinationOpt.isPresent()) {
-            Destination existingDestination = existingDestinationOpt.get();
-            existingDestination.setName(updatedDestination.getName());
-            existingDestination.setLocation(updatedDestination.getLocation());
-            existingDestination.setDescription(updatedDestination.getDescription());
-            existingDestination.setImageUrl(updatedDestination.getImageUrl());
+    // public Destination updateDestination(Long id, Destination updatedDestination) {
+    //     Optional<Destination> existingDestinationOpt = destinationRepository.findById(id);
+    //     if (existingDestinationOpt.isPresent()) {
+    //         Destination existingDestination = existingDestinationOpt.get();
+    //         existingDestination.setName(updatedDestination.getName());
+    //         existingDestination.setLocation(updatedDestination.getLocation());
+    //         existingDestination.setDescription(updatedDestination.getDescription());
+    //         existingDestination.setImageUrl(updatedDestination.getImageUrl());
 
-            return destinationRepository.save(existingDestination);
-        } else {
-            throw new RuntimeException("Destination not found with id " + id);
-        }
-    }
+    //         return destinationRepository.save(existingDestination);
+    //     } else {
+    //         throw new RuntimeException("Destination not found with id " + id);
+    //     }
+    // }
 
     public void deleteDestination(Long id) {
         destinationRepository.deleteById(id);
