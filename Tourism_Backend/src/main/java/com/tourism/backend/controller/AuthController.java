@@ -22,6 +22,11 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // @GetMapping("/hello")
+    // public String hello() {
+    //     return "Hello from Auth Controller";
+    // }
+
     @PostMapping("/register")
     public String register(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));

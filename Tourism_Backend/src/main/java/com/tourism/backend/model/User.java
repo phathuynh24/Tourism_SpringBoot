@@ -11,7 +11,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "\"users\"")
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +20,10 @@ public class User {
     private String username;
     private String password;
     private String email;
+
+    // New fields for profile management
+    private String firstName;
+    private String lastName;
+    private String bio;
+    private String profilePicture;
 }

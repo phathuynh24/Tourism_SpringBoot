@@ -47,7 +47,13 @@ public class JWTRequestFilter extends OncePerRequestFilter {
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+                // Thêm log để kiểm tra
+                logger.info("User " + username + " has been authenticated and SecurityContext has been set.");
+            } else {
+                logger.warn("JWT token is not valid.");
             }
+
         }
         chain.doFilter(request, response);
     }
