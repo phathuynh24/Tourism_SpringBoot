@@ -1,6 +1,6 @@
 package com.tourism.backend.config;
 
-// import com.tourism.backend.security.JWTRequestFilter;
+import com.tourism.backend.security.JWTRequestFilter;
 import com.tourism.backend.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,17 +14,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final UserService userService;
-    // private final JWTRequestFilter jwtRequestFilter;
+    private final JWTRequestFilter jwtRequestFilter;
 
-    public SecurityConfig(UserService userService /*, JWTRequestFilter jwtRequestFilter*/) {
+    public SecurityConfig(UserService userService, JWTRequestFilter jwtRequestFilter) {
         this.userService = userService;
-        // this.jwtRequestFilter = jwtRequestFilter;
+        this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
@@ -32,11 +33,14 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/destination/**").permitAll()
+                        .requestMatchers("user/**").authenticated()
                         .anyRequest().permitAll())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

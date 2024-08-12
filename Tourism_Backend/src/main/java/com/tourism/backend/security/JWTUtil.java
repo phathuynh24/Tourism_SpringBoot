@@ -58,7 +58,7 @@ public class JWTUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Token có hiệu lực trong 10 giờ
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // time to live: 10 hours
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
