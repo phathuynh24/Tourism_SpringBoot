@@ -31,15 +31,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Disable CSRF (Cross-Site Request Forgery) protection since we're using stateless sessions (JWT)
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // Configure URL-based authorization
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/destination/**").permitAll()
-                        .requestMatchers("user/**").authenticated()
+                        .requestMatchers("/destination/**").hasRole("USER")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").authenticated()
                         .anyRequest().permitAll())
+
+                // Configure session management to use stateless sessions
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // Add the JWTRequestFilter before the UsernamePasswordAuthenticationFilter in the filter chain
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
