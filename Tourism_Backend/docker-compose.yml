@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: tourism_backend
       POSTGRES_PASSWORD: phat123456
     ports:
-      - "5433:5432"  # Change the external port to 5433 to avoid conflict
+      - "5433:5432"
     volumes:
       - tourism_postgres_data:/var/lib/postgresql/data
 
