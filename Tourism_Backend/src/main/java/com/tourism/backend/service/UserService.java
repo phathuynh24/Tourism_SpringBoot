@@ -4,7 +4,6 @@ import com.tourism.backend.model.Role;
 import com.tourism.backend.model.User;
 import com.tourism.backend.repository.UserRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,8 +18,11 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -42,8 +44,41 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void saveUser(User user) {
-        userRepository.save(user);
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public User updateUser(Long id, User updatedUser) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        user.setUsername(updatedUser.getUsername());
+        user.setEmail(updatedUser.getEmail());
+        user.setPassword(updatedUser.getPassword());
+        user.setRoles(updatedUser.getRoles());
+        return userRepository.save(user);
+    }
+
+    public void updateUserPassword(Long id, String newPassword) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setPassword(newPassword);
+            userRepository.save(user);
+        }
     }
 
     public User findByEmail(String email) {
@@ -52,5 +87,25 @@ public class UserService implements UserDetailsService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public List<User> searchUsersByName(String name) {
+        return userRepository.findByUsernameContaining(name);
+    }
+
+    public void lockUserAccount(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setAccountNonLocked(false);
+            userRepository.save(user);
+        }
+    }
+
+    public void unlockUserAccount(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setAccountNonLocked(true);
+            userRepository.save(user);
+        }
     }
 }
