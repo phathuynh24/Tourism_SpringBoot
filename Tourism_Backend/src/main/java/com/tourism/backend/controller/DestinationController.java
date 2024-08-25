@@ -1,18 +1,24 @@
 package com.tourism.backend.controller;
 
+import com.tourism.backend.constants.ApiPaths;
 import com.tourism.backend.model.Destination;
 import com.tourism.backend.repository.DestinationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping("/destination")
+@RequestMapping(ApiPaths.DESTINATIONS)
 public class DestinationController {
 
-    @Autowired
-    private DestinationRepository destinationRepository;
+    private final DestinationRepository destinationRepository;
+
+    public DestinationController(DestinationRepository destinationRepository) {
+        this.destinationRepository = destinationRepository;
+    }
 
     @PostMapping
     public Destination createDestination(@RequestBody Destination destination) {
@@ -42,4 +48,5 @@ public class DestinationController {
     public void deleteDestination(@PathVariable Long id) {
         destinationRepository.deleteById(id);
     }
+    
 }
