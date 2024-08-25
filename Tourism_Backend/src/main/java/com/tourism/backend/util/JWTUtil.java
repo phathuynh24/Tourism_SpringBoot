@@ -1,9 +1,10 @@
-package com.tourism.backend.security;
+package com.tourism.backend.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,14 @@ import java.util.function.Function;
 public class JWTUtil {
 
     private final SecretKey SECRET_KEY;
-    private final SecretKey REFRESH_SECRET_KEY;
+    private static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60 * 10; // 10 hours
 
-    public JWTUtil() {
-        this.SECRET_KEY = Keys.hmacShaKeyFor("HuynhPhatSuperSecretKeyForJWTGeneration2024".getBytes());
-        this.REFRESH_SECRET_KEY = Keys.hmacShaKeyFor("HuynhPhatRefreshTokenSecretKey2024".getBytes());
+    public JWTUtil(@Value("${JWT_SECRET_KEY}") String secretKey) {
+        this.SECRET_KEY = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String extractUsername(String token, boolean isRefreshToken) {
-        return extractClaim(token, Claims::getSubject, isRefreshToken ? REFRESH_SECRET_KEY : SECRET_KEY);
+    public String extractUsernameFromToken(String token) {
+        return extractClaim(token, Claims::getSubject, SECRET_KEY);
     }
 
     private Date extractExpiration(String token, SecretKey key) {
@@ -46,15 +46,7 @@ public class JWTUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername(), SECRET_KEY, 1000 * 60 * 60 * 10); // 10 hours
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        long nowMillis = System.currentTimeMillis();
-        long ttlMillis = 1000 * 60 * 60 * 24 * 30; // 30 days
-        return createToken(claims, userDetails.getUsername(), REFRESH_SECRET_KEY, nowMillis + ttlMillis);
+        return createToken(new HashMap<>(), userDetails.getUsername(), SECRET_KEY, JWT_TOKEN_VALIDITY);
     }
 
     private String createToken(Map<String, Object> claims, String subject, SecretKey key, long ttlMillis) {
@@ -63,26 +55,18 @@ public class JWTUtil {
     
         long expMillis = nowMillis + ttlMillis;
         Date exp = new Date(expMillis);
-
-        // Log thời gian để kiểm tra
-        System.out.println("Creating token with iat: " + now + " and exp: " + exp);
     
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
-                .setIssuedAt(now)  // Sử dụng thời gian hiện tại
-                .setExpiration(exp) // Đặt thời gian hết hạn chính xác
+                .setIssuedAt(now)
+                .setExpiration(exp)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-    }    
-
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token, false);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, SECRET_KEY));
     }
 
-    public Boolean validateRefreshToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token, true);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, REFRESH_SECRET_KEY));
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsernameFromToken(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token, SECRET_KEY));
     }
 }
