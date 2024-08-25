@@ -2,6 +2,7 @@ package com.tourism.backend.config;
 
 import com.tourism.backend.security.JWTRequestFilter;
 import com.tourism.backend.service.UserService;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,9 +38,10 @@ public class SecurityConfig {
                 // Configure URL-based authorization
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/destination/**").hasRole("USER")
+                        .requestMatchers("/destinations/**").permitAll()
+                        .requestMatchers("/reviews/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().permitAll())
 
                 // Configure session management to use stateless sessions
