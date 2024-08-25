@@ -3,6 +3,9 @@ package com.tourism.backend.model;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.tourism.backend.constants.TableNames;
+import static com.tourism.backend.constants.TableNames.*;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -14,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +28,7 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = TableNames.USERS)
 public class User {
 
     public User() {}
@@ -44,20 +48,15 @@ public class User {
     private String username;
     private String password;
     private String email;
-
-    // New fields for profile management
     private String firstName;
     private String lastName;
     private String bio;
     private String profilePicture;
-
-    // New fields for OAuth2
-    private String refreshToken;
+    private boolean accountNonLocked = true;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = USER_ROLES, joinColumns = @JoinColumn(name = USER_ID_COLUMN)) 
     @Enumerated(EnumType.STRING)
-    // New field for roles
     private Set<Role> roles;
 
     public List<GrantedAuthority> getAuthorities() {
