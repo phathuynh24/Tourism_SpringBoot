@@ -1,16 +1,18 @@
 package com.tourism.backend.controller;
 
 import com.tourism.backend.constants.ApiPaths;
+import com.tourism.backend.dto.user.UserDTO;
+import com.tourism.backend.dto.user.UserUpdateDTO;
+import com.tourism.backend.dto.user.UserPasswordDTO;
 import com.tourism.backend.model.User;
 import com.tourism.backend.service.UserService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
 import java.util.List;
 
 @RestController
@@ -23,22 +25,49 @@ public class UserController {
         this.userService = userService;
     }
 
+    private UserDTO convertToDto(User user) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setFirstName(user.getFirstName());
+        userDTO.setLastName(user.getLastName());
+        return userDTO;
+    }
+
+    private User convertToEntity(UserUpdateDTO userUpdateDTO) {
+        User user = new User();
+        // user.setUsername(userUpdateDTO.getUsername());
+        user.setEmail(userUpdateDTO.getEmail());
+        user.setFirstName(userUpdateDTO.getFirstName());
+        user.setLastName(userUpdateDTO.getLastName());
+        user.setBio(userUpdateDTO.getBio());
+        user.setProfilePicture(userUpdateDTO.getProfilePicture());
+        return user;
+    }
+
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        List<UserDTO> userDTOs = users.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDTOs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+        UserDTO userDTO = convertToDto(user);
+        return ResponseEntity.ok(userDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO updatedUserDTO) {
+        User updatedUser = convertToEntity(updatedUserDTO);
         User user = userService.updateUser(id, updatedUser);
-        return ResponseEntity.ok(user);
+        UserDTO userDTO = convertToDto(user);
+        return ResponseEntity.ok(userDTO);
     }
 
     @DeleteMapping("/{id}")
@@ -48,15 +77,18 @@ public class UserController {
     }
 
     @PutMapping("/{id}/password")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id, @RequestBody String newPassword) {
-        userService.updateUserPassword(id, newPassword);
+    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id, @RequestBody UserPasswordDTO newPasswordDTO) {
+        userService.updateUserPassword(id, newPasswordDTO.getNewPassword());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsersByName(@RequestParam String name) {
+    public ResponseEntity<List<UserDTO>> searchUsersByName(@RequestParam String name) {
         List<User> users = userService.searchUsersByName(name);
-        return ResponseEntity.ok(users);
+        List<UserDTO> userDTOs = users.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(userDTOs);
     }
 
     @PutMapping("/{id}/lock")
@@ -72,10 +104,11 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<User> getCurrentUserProfile() {
+    public ResponseEntity<UserDTO> getCurrentUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
         User user = userService.getUserByUsername(currentUsername);
-        return ResponseEntity.ok(user);
+        UserDTO userDTO = convertToDto(user);
+        return ResponseEntity.ok(userDTO);
     }
 }

@@ -61,18 +61,29 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUser(Long id, User updatedUser) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            return null;
-        }
-
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        user.setPassword(updatedUser.getPassword());
-        user.setRoles(updatedUser.getRoles());
-        return userRepository.save(user);
+        return userRepository.findById(id).map(user -> {
+            // if (updatedUser.getUsername() != null) {
+            //     user.setUsername(updatedUser.getUsername());
+            // }
+            if (updatedUser.getEmail() != null) {
+                user.setEmail(updatedUser.getEmail());
+            }
+            if (updatedUser.getFirstName() != null) {
+                user.setFirstName(updatedUser.getFirstName());
+            }
+            if (updatedUser.getLastName() != null) {
+                user.setLastName(updatedUser.getLastName());
+            }
+            if (updatedUser.getBio() != null) {
+                user.setBio(updatedUser.getBio());
+            }
+            if (updatedUser.getProfilePicture() != null) {
+                user.setProfilePicture(updatedUser.getProfilePicture());
+            }
+            return userRepository.save(user);
+        }).orElse(null);
     }
-
+    
     public void updateUserPassword(Long id, String newPassword) {
         User user = userRepository.findById(id).orElse(null);
         if (user != null) {
