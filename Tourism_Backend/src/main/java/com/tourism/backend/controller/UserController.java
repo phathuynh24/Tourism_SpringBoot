@@ -3,6 +3,7 @@ package com.tourism.backend.controller;
 import com.tourism.backend.constants.ApiPaths;
 import com.tourism.backend.dto.user.UserDTO;
 import com.tourism.backend.dto.user.UserUpdateDTO;
+import com.tourism.backend.exception.UserNotFoundException;
 import com.tourism.backend.dto.user.UserPasswordDTO;
 import com.tourism.backend.model.User;
 import com.tourism.backend.service.UserService;
@@ -27,26 +28,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    private UserDTO convertToDto(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setFirstName(user.getFirstName());
-        userDTO.setLastName(user.getLastName());
-        return userDTO;
-    }
-
-    private User convertToEntity(UserUpdateDTO userUpdateDTO) {
-        User user = new User();
-        user.setEmail(userUpdateDTO.getEmail());
-        user.setFirstName(userUpdateDTO.getFirstName());
-        user.setLastName(userUpdateDTO.getLastName());
-        user.setBio(userUpdateDTO.getBio());
-        user.setProfilePicture(userUpdateDTO.getProfilePicture());
-        return user;
-    }
-
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userService.getAllUsers();
@@ -59,6 +40,9 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with id: " + id);
+        }
         UserDTO userDTO = convertToDto(user);
         return ResponseEntity.ok(userDTO);
     }
@@ -111,5 +95,25 @@ public class UserController {
         User user = userService.getUserByUsername(currentUsername);
         UserDTO userDTO = convertToDto(user);
         return ResponseEntity.ok(userDTO);
+    }
+
+    private UserDTO convertToDto(User user) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setFirstName(user.getFirstName());
+        userDTO.setLastName(user.getLastName());
+        return userDTO;
+    }
+
+    private User convertToEntity(UserUpdateDTO userUpdateDTO) {
+        User user = new User();
+        user.setEmail(userUpdateDTO.getEmail());
+        user.setFirstName(userUpdateDTO.getFirstName());
+        user.setLastName(userUpdateDTO.getLastName());
+        user.setBio(userUpdateDTO.getBio());
+        user.setProfilePicture(userUpdateDTO.getProfilePicture());
+        return user;
     }
 }
