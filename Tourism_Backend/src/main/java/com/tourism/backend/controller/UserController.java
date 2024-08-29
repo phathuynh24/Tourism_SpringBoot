@@ -3,7 +3,6 @@ package com.tourism.backend.controller;
 import com.tourism.backend.constants.ApiPaths;
 import com.tourism.backend.dto.user.UserDTO;
 import com.tourism.backend.dto.user.UserUpdateDTO;
-import com.tourism.backend.exception.UserNotFoundException;
 import com.tourism.backend.dto.user.UserPasswordDTO;
 import com.tourism.backend.model.User;
 import com.tourism.backend.service.UserService;
@@ -40,9 +39,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        if (user == null) {
-            throw new UserNotFoundException("User not found with id: " + id);
-        }
         UserDTO userDTO = convertToDto(user);
         return ResponseEntity.ok(userDTO);
     }
