@@ -7,6 +7,8 @@ import com.tourism.backend.dto.user.UserPasswordDTO;
 import com.tourism.backend.model.User;
 import com.tourism.backend.service.UserService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +39,6 @@ public class UserController {
 
     private User convertToEntity(UserUpdateDTO userUpdateDTO) {
         User user = new User();
-        // user.setUsername(userUpdateDTO.getUsername());
         user.setEmail(userUpdateDTO.getEmail());
         user.setFirstName(userUpdateDTO.getFirstName());
         user.setLastName(userUpdateDTO.getLastName());
@@ -63,7 +64,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO updatedUserDTO) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO updatedUserDTO) {
         User updatedUser = convertToEntity(updatedUserDTO);
         User user = userService.updateUser(id, updatedUser);
         UserDTO userDTO = convertToDto(user);
@@ -77,7 +78,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/password")
-    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id, @RequestBody UserPasswordDTO newPasswordDTO) {
+    public ResponseEntity<Void> updateUserPassword(@PathVariable Long id, @Valid @RequestBody UserPasswordDTO newPasswordDTO) {
         userService.updateUserPassword(id, newPasswordDTO.getNewPassword());
         return ResponseEntity.ok().build();
     }
